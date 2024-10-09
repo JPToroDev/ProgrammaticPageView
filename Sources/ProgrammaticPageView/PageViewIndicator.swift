@@ -19,6 +19,12 @@ struct PageViewIndicator: View {
     ///
     /// When `true`, tapping an indicator will update `currentIndex`.
     var isInteractionEnabled: Bool
+  
+    /// The haptic feedback to play when the current page changes.
+    ///
+    /// If set, this feedback will be triggered when the current page index
+    /// matches the index of an indicator. Set to `nil` to disable feedback.
+    var feedback: SensoryFeedback?
     
     /// The SF Symbol name to use for page indicators.
     var pageSymbol: String
@@ -41,6 +47,9 @@ struct PageViewIndicator: View {
                     .font(.system(size: indicatorSize.pointSize))
                     .foregroundStyle(currentIndex == index ? .white : Color(.tertiaryLabel))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: currentIndex == index)
+                    .sensoryFeedback(trigger: currentIndex) { _, newIndex in
+                      newIndex == index ? feedback : nil
+                    }
                     .onTapGesture {
                         if isInteractionEnabled {
                             currentIndex = index

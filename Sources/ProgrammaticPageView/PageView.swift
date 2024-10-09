@@ -38,6 +38,7 @@ public struct PageView<Content: View>: View {
     private var backwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))
     private var animation: Animation? = .default
     private var isInteractionEnabled: Bool = false
+    private var feedback: SensoryFeedback? = .impact
     private var isShowingIndicator: Bool = false
     private var pageSymbol: String = "circle.fill"
     private var symbolSpacing: PageViewIndicatorSymbolSpacing = .default
@@ -66,6 +67,7 @@ public struct PageView<Content: View>: View {
                     subviewCount: numberOfSubviews,
                     currentIndex: $index,
                     isInteractionEnabled: isInteractionEnabled,
+                    feedback: feedback,
                     pageSymbol: pageSymbol,
                     symbolSpacing: symbolSpacing,
                     indicatorSize: indicatorSize,
@@ -190,11 +192,13 @@ extension PageView {
     /// - Parameters:
     ///   - visibility: Determines whether the indicator is visible. Default is `.visible`.
     ///   - interactionEnabled: A Boolean value that determines whether tapping on indicators changes the current page. Default is `false`.
+    ///   - feedback: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback. Default is `.impact`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false) -> Self {
+    public func pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false, feedback: SensoryFeedback? = .impact) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
         copy.isInteractionEnabled = interactionEnabled
+        copy.feedback = feedback
         return copy
     }
     

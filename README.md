@@ -157,13 +157,6 @@ Sets a custom background style for the page view indicator.
 - `background`: A shape style to be used as the background for the indicator. If `nil`, the background will be removed.
 
 ```swift
-pageViewIndicatorBackground(_ background: ExpressibleByNilLiteral?) -> Self
-```
-
-Removes the background of the page view indicator.
-- `background`: Pass `nil` to remove the background.
-
-```swift
 pageViewIndicatorOffset(_ offset: CGFloat) -> Self
 ```
 

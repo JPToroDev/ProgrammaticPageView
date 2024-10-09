@@ -194,7 +194,11 @@ extension PageView {
     ///   - interactionEnabled: A Boolean value that determines whether tapping on indicators changes the current page. Default is `false`.
     ///   - feedback: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback. Default is `.impact`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false, feedback: SensoryFeedback? = .impact) -> Self {
+    public func pageViewIndicator(
+        visibility: Visibility = .visible,
+        interactionEnabled: Bool = false,
+        feedback: SensoryFeedback? = .impact
+    ) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
         copy.isInteractionEnabled = interactionEnabled

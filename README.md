@@ -134,13 +134,26 @@ Sets the default page without animation. This will be overridden if `index` is n
 - `page`: `.first` or `.last`.
 
 ```swift
-pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false, feedback: SensoryFeedback? = .impact) -> Self
+pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false) -> Self
 ```
 
 Configures the page view indicator's visibility and interaction.
 - `visibility`: Determines whether the indicator is visible.
 - `interactionEnabled`: Determines whether tapping on indicators changes the current page.
+
+```swift
+func pageViewFeedback(_ feedback: SensoryFeedback?) -> Self
+```
+
+Sets the haptic feedback for page transitions in the page view.
 - `feedback`: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback.
+
+```swift
+func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self
+```
+
+Configures a long press action for the page view indicator.
+- `action`: A closure to be executed when the page view indicator is long-pressed.
 
 ```swift
 func pageViewIndicatorSymbol(_ pageSymbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default) -> Self

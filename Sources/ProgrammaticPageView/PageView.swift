@@ -44,6 +44,7 @@ public struct PageView<Content: View>: View {
     private var symbolSpacing: PageViewIndicatorSymbolSpacing = .default
     private var indicatorOffset: CGFloat = 0
     private var indicatorSize: PageViewIndicatorSize = .regular
+    private var indicatorLongPressAction: (() -> Void)?
     private var indicatorBackgroundStyle: AnyShapeStyle? = AnyShapeStyle(Material.regular)
     
     private var transition: AnyTransition {
@@ -67,13 +68,16 @@ public struct PageView<Content: View>: View {
                     subviewCount: numberOfSubviews,
                     currentIndex: $index,
                     isInteractionEnabled: isInteractionEnabled,
-                    feedback: feedback,
                     pageSymbol: pageSymbol,
                     symbolSpacing: symbolSpacing,
                     indicatorSize: indicatorSize,
-                    indicatorBackgroundStyle: indicatorBackgroundStyle)
+                    indicatorBackgroundStyle: indicatorBackgroundStyle,
+                    indicatorLongPressAction: indicatorLongPressAction)
                 .padding(.bottom, indicatorOffset)
             }
+        }
+        .sensoryFeedback(trigger: currentIndex) { _, _ in
+            return feedback
         }
         .task { @MainActor in
             isIgnoringChange = true
@@ -188,21 +192,33 @@ extension PageView {
         return copy
     }
     
+    /// Configures a long press action for the page view indicator.
+    /// - Parameter action: A closure to be executed when the page view indicator is long-pressed.
+    /// - Returns: A modified instance of PageView with the specified long press action.
+    public func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self {
+        var copy = self
+        copy.indicatorLongPressAction = action
+        return copy
+    }
+    
+    /// Sets the haptic feedback for page transitions in the page view.
+    /// - Parameter feedback: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback.
+    /// - Returns: A modified instance of PageView with the specified feedback configuration.
+    public func pageViewFeedback(_ feedback: SensoryFeedback?) -> Self {
+        var copy = self
+        copy.feedback = feedback
+        return copy
+    }
+    
     /// Configures the page view indicator's visibility and interaction.
     /// - Parameters:
     ///   - visibility: Determines whether the indicator is visible. Default is `.visible`.
     ///   - interactionEnabled: A Boolean value that determines whether tapping on indicators changes the current page. Default is `false`.
-    ///   - feedback: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback. Default is `.impact`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicator(
-        visibility: Visibility = .visible,
-        interactionEnabled: Bool = false,
-        feedback: SensoryFeedback? = .impact
-    ) -> Self {
+    public func pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
         copy.isInteractionEnabled = interactionEnabled
-        copy.feedback = feedback
         return copy
     }
     

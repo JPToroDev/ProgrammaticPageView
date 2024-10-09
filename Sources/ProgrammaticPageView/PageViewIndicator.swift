@@ -19,12 +19,6 @@ struct PageViewIndicator: View {
     ///
     /// When `true`, tapping an indicator will update `currentIndex`.
     var isInteractionEnabled: Bool
-  
-    /// The haptic feedback to play when the current page changes.
-    ///
-    /// If set, this feedback will be triggered when the current page index
-    /// matches the index of an indicator. Set to `nil` to disable feedback.
-    var feedback: SensoryFeedback?
     
     /// The SF Symbol name to use for page indicators.
     var pageSymbol: String
@@ -40,6 +34,30 @@ struct PageViewIndicator: View {
     /// The background style for the page view indicator.
     var indicatorBackgroundStyle: AnyShapeStyle?
     
+    var indicatorLongPressAction: (() -> Void)?
+    
+    private enum LongPressPhase {
+        case inactive, pressing, pressed
+    }
+    
+    @State private var longPressPhase: LongPressPhase = .inactive
+    
+    private var maxScale: CGFloat {
+        switch longPressPhase {
+        case .inactive: return 1
+        case .pressing: return 1.05
+        case .pressed:  return 1.2
+        }
+    }
+    
+    private var animationSpeed: Double {
+        switch longPressPhase {
+        case .inactive: return 1
+        case .pressing: return 0.2
+        case .pressed:  return 1
+        }
+    }
+    
     var body: some View {
         HStack(spacing: symbolSpacing.size) {
             ForEach(0..<subviewCount, id: \.self) { index in
@@ -47,20 +65,31 @@ struct PageViewIndicator: View {
                     .font(.system(size: indicatorSize.pointSize))
                     .foregroundStyle(currentIndex == index ? .white : Color(.tertiaryLabel))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: currentIndex == index)
-                    .sensoryFeedback(trigger: currentIndex) { _, newIndex in
-                      newIndex == index ? feedback : nil
-                    }
                     .onTapGesture {
                         if isInteractionEnabled {
                             currentIndex = index
                         }
                     }
+                    .animation(nil, value: longPressPhase)
             }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
-        .background(
-            indicatorBackgroundStyle.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.clear),
-            in: .capsule)
+        .background {
+            Capsule()
+                .fill(indicatorBackgroundStyle.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.clear))
+                .colorMultiply(longPressPhase != .inactive ? Color.gray.mix(with: .white, by: 0.8) : .white)
+        }
+        .scaleEffect(maxScale)
+        .animation(.spring(response: 0.4, dampingFraction: 0.6).speed(animationSpeed), value: longPressPhase)
+        .onLongPressGesture(minimumDuration: 0.5) {
+            longPressPhase = .pressed
+            indicatorLongPressAction?()
+        } onPressingChanged: { isInProgress in
+            longPressPhase = isInProgress ? .pressing : .inactive
+        }
+        .sensoryFeedback(trigger: longPressPhase) { _, phase in
+            phase == .pressed ? .success : .none
+        }
     }
 }

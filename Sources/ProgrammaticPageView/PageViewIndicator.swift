@@ -65,12 +65,13 @@ struct PageViewIndicator: View {
                     .font(.system(size: indicatorSize.pointSize))
                     .foregroundStyle(currentIndex == index ? .white : Color(.tertiaryLabel))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: currentIndex == index)
-                    .onTapGesture {
-                        if isInteractionEnabled {
-                            currentIndex = index
+                    .animation(nil, value: longPressPhase)
+                    .if(isInteractionEnabled) { content in
+                      content
+                        .onTapGesture {
+                          currentIndex = index
                         }
                     }
-                    .animation(nil, value: longPressPhase)
             }
         }
         .padding(.vertical, 8)
@@ -82,14 +83,17 @@ struct PageViewIndicator: View {
         }
         .scaleEffect(maxScale)
         .animation(.spring(response: 0.4, dampingFraction: 0.6).speed(animationSpeed), value: longPressPhase)
-        .onLongPressGesture(minimumDuration: 0.5) {
-            longPressPhase = .pressed
-            indicatorLongPressAction?()
-        } onPressingChanged: { isInProgress in
-            longPressPhase = isInProgress ? .pressing : .inactive
-        }
         .sensoryFeedback(trigger: longPressPhase) { _, phase in
             phase == .pressed ? .success : .none
+        }
+        .if(isInteractionEnabled) { content in
+          content
+            .onLongPressGesture(minimumDuration: 0.5) {
+                longPressPhase = .pressed
+                indicatorLongPressAction?()
+            } onPressingChanged: { isInProgress in
+                longPressPhase = isInProgress ? .pressing : .inactive
+            }
         }
     }
 }

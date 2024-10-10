@@ -153,7 +153,9 @@ func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self
 ```
 
 Configures a long press action for the page view indicator.
-- `action`: A closure to be executed when the page view indicator is long-pressed.
+  - `action`: A closure to be executed when the page view indicator is long-pressed.
+  
+**Note:** This action will work only if `interactionEnabled` is set to `true` for the page view indicator.
 
 ```swift
 func pageViewIndicatorSymbol(_ pageSymbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default) -> Self

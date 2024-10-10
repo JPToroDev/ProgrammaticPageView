@@ -195,6 +195,7 @@ extension PageView {
     /// Configures a long press action for the page view indicator.
     /// - Parameter action: A closure to be executed when the page view indicator is long-pressed.
     /// - Returns: A modified instance of PageView with the specified long press action.
+    /// - Note: This action will work only if `interactionEnabled` is set to `true` for the page view indicator.
     public func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self {
         var copy = self
         copy.indicatorLongPressAction = action

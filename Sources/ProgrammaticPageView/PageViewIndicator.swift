@@ -26,8 +26,8 @@ struct PageViewIndicator: View {
     /// When `true`, tapping an index icon will update `currentIndex`.
     var areIndicesInteractive: Bool
     
-    /// The SF Symbol name to use for page indicators.
-    var pageSymbol: String
+    /// The SF Symbol name to use for indicator's indices.
+    var indexSymbol: String
     
     /// The spacing between page indicator symbols.
     var symbolSpacing: PageViewIndicatorSymbolSpacing
@@ -35,7 +35,7 @@ struct PageViewIndicator: View {
     /// The size of the page indicators.
     ///
     /// This property determines the font size of the SF Symbols used for the page indicators.
-    var indicatorSize: PageViewIndicatorSize
+    var symbolSize: PageViewIndicatorSize
     
     /// The background style for the page view indicator.
     var indicatorBackgroundStyle: AnyShapeStyle?
@@ -98,8 +98,8 @@ struct PageViewIndicator: View {
     private var dotIndices: some View {
         HStack(spacing: symbolSpacing.size) {
             ForEach(0..<subviewCount, id: \.self) { index in
-                Image(systemName: pageSymbol)
-                    .font(.system(size: indicatorSize.pointSize))
+                Image(systemName: indexSymbol)
+                    .font(.system(size: symbolSize.pointSize))
                     .foregroundStyle(externalIndex == index ? .white : Color(.tertiaryLabel))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: externalIndex == index)
                     .animation(nil, value: longPressPhase)

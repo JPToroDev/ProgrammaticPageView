@@ -41,7 +41,7 @@ public struct PageView<Content: View>: View {
     private var areIndicesInteractive: Bool = false
     private var feedback: SensoryFeedback? = .impact
     private var isShowingIndicator: Bool = false
-    private var pageSymbol: String = "circle.fill"
+    private var indexSymbol: String = "circle.fill"
     private var symbolSpacing: PageViewIndicatorSymbolSpacing = .default
     private var indicatorOffset: CGFloat = 0
     private var indicatorSize: PageViewIndicatorSize = .regular
@@ -71,9 +71,9 @@ public struct PageView<Content: View>: View {
                     internalIndex: internalIndex,
                     style: indicatorStyle,
                     areIndicesInteractive: areIndicesInteractive,
-                    pageSymbol: pageSymbol,
+                    indexSymbol: indexSymbol,
                     symbolSpacing: symbolSpacing,
-                    indicatorSize: indicatorSize,
+                    symbolSize: indicatorSize,
                     indicatorBackgroundStyle: indicatorBackgroundStyle,
                     indicatorLongPressAction: indicatorLongPressAction)
                 .padding(.bottom, indicatorOffset)
@@ -218,19 +218,19 @@ extension PageView {
     
     /// Configures the page view indicator's symbol, size, and spacing.
     /// - Parameters:
-    ///   - pageSymbol: The SF Symbol name to use for page indicators. Default is "circle.fill".
+    ///   - symbol: The SF Symbol name to use for page indicators. Default is "circle.fill".
     ///   - size: The size of the page indicator symbols. Default is `.regular`.
     ///   - spacing: The spacing between page indicator symbols. Default is `.default`.
     ///   - interactionEnabled: A Boolean value that determines whether tapping on index icons changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator symbol, size, and spacing.
     public func pageViewIndicatorIndexSymbol(
-        _ pageSymbol: String = "circle.fill",
+        _ symbol: String = "circle.fill",
         size: PageViewIndicatorSize = .regular,
         spacing: PageViewIndicatorSymbolSpacing = .default,
         interactionEnabled: Bool = false
     ) -> Self {
         var copy = self
-        copy.pageSymbol = pageSymbol
+        copy.indexSymbol = symbol
         copy.indicatorSize = size
         copy.symbolSpacing = spacing
         copy.areIndicesInteractive = interactionEnabled

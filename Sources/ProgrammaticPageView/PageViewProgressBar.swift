@@ -106,7 +106,6 @@ struct PageViewProgressBar: View {
     
     /// Animates a regular progress update.
     private func animateProgressUpdate() {
-        alignment = .leading
         /// If looping is enabled and the index is decreasing rapidly,
         /// this method will block the second animation completion handler above.
         /// So we'll cache the changes and execute them in the handler.
@@ -114,6 +113,7 @@ struct PageViewProgressBar: View {
             cachedIncrements -= 1
             return
         }
+        alignment = .leading
         withAnimation(animation) {
             updateProgress()
         }

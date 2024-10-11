@@ -12,13 +12,19 @@ struct PageViewIndicator: View {
     /// The total number of pages to represent.
     var subviewCount: Int
     
-    /// A binding to the current page index.
-    @Binding var currentIndex: Int
+    /// A binding to the currently selected page index, allowing two-way communication with parent views.
+    @Binding var externalIndex: Int
     
-    /// A Boolean value that determines whether tapping on indicators changes the current page.
+    /// The current page index used for internal calculations and animations.
+    var internalIndex: Int
+    
+    /// Determines the visual appearance of the page indicator (dots or progress bar).
+    var style: PageViewIndicatorStyle
+    
+    /// A Boolean value that determines whether tapping on index icons changes the current page.
     ///
-    /// When `true`, tapping an indicator will update `currentIndex`.
-    var isInteractionEnabled: Bool
+    /// When `true`, tapping an index icon will update `currentIndex`.
+    var areIndicesInteractive: Bool
     
     /// The SF Symbol name to use for page indicators.
     var pageSymbol: String
@@ -59,19 +65,11 @@ struct PageViewIndicator: View {
     }
     
     var body: some View {
-        HStack(spacing: symbolSpacing.size) {
-            ForEach(0..<subviewCount, id: \.self) { index in
-                Image(systemName: pageSymbol)
-                    .font(.system(size: indicatorSize.pointSize))
-                    .foregroundStyle(currentIndex == index ? .white : Color(.tertiaryLabel))
-                    .symbolEffect(.bounce.up, options: .nonRepeating, isActive: currentIndex == index)
-                    .animation(nil, value: longPressPhase)
-                    .if(isInteractionEnabled) { content in
-                      content
-                        .onTapGesture {
-                          currentIndex = index
-                        }
-                    }
+        Group {
+            if case .bar(let width) = style {
+                progressBar(width: width)
+            } else {
+                dotIndices
             }
         }
         .padding(.vertical, 8)
@@ -86,14 +84,38 @@ struct PageViewIndicator: View {
         .sensoryFeedback(trigger: longPressPhase) { _, phase in
             phase == .pressed ? .success : .none
         }
-        .if(isInteractionEnabled) { content in
-          content
-            .onLongPressGesture(minimumDuration: 0.5) {
-                longPressPhase = .pressed
-                indicatorLongPressAction?()
-            } onPressingChanged: { isInProgress in
-                longPressPhase = isInProgress ? .pressing : .inactive
+        .if(indicatorLongPressAction != nil) { content in
+            content
+                .onLongPressGesture(minimumDuration: 0.5) {
+                    longPressPhase = .pressed
+                    indicatorLongPressAction?()
+                } onPressingChanged: { isInProgress in
+                    longPressPhase = isInProgress ? .pressing : .inactive
+                }
+        }
+    }
+    
+    private var dotIndices: some View {
+        HStack(spacing: symbolSpacing.size) {
+            ForEach(0..<subviewCount, id: \.self) { index in
+                Image(systemName: pageSymbol)
+                    .font(.system(size: indicatorSize.pointSize))
+                    .foregroundStyle(externalIndex == index ? .white : Color(.tertiaryLabel))
+                    .symbolEffect(.bounce.up, options: .nonRepeating, isActive: externalIndex == index)
+                    .animation(nil, value: longPressPhase)
+                    .if(areIndicesInteractive) { content in
+                        content
+                            .onTapGesture {
+                                externalIndex = index
+                            }
+                    }
             }
         }
     }
+    
+    private func progressBar(width: CGFloat) -> some View {
+        PageViewProgressBar(currentIndex: internalIndex, totalPages: subviewCount)
+            .frame(maxWidth: width)
+    }
 }
+

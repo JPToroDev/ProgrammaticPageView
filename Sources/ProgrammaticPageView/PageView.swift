@@ -16,19 +16,19 @@ public struct PageView<Content: View>: View {
         loops: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
-        self._index = index
+        self._externalIndex = index
         self.isLooping = loops
         self.content = content()
     }
     
     /// A binding to the current index of the pager.
-    @Binding public var index: Int
+    @Binding public var externalIndex: Int
     /// A Boolean value indicating whether the pager should loop from the last item back to the first.
     public var isLooping: Bool
     /// The content of the pager.
     @ViewBuilder public var content: Content
     
-    @State private var currentIndex: Int = 0
+    @State private var internalIndex: Int = 0
     @State private var isMovingForward: Bool = true
     @State private var isIgnoringChange: Bool = false
     @State private var numberOfSubviews = 0
@@ -37,7 +37,8 @@ public struct PageView<Content: View>: View {
     private var forwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
     private var backwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))
     private var animation: Animation? = .default
-    private var isInteractionEnabled: Bool = false
+    private var indicatorStyle: PageViewIndicatorStyle = .dots
+    private var areIndicesInteractive: Bool = false
     private var feedback: SensoryFeedback? = .impact
     private var isShowingIndicator: Bool = false
     private var pageSymbol: String = "circle.fill"
@@ -55,7 +56,7 @@ public struct PageView<Content: View>: View {
         ZStack(alignment: .bottom) {
             Group(subviews: content) { subviews in
                 ForEach(Array(subviews.enumerated()), id: \.offset) { index, subview in
-                    if index == currentIndex {
+                    if index == internalIndex {
                         subview
                             .transition(transition)
                             .onAppear { numberOfSubviews = subviews.count }
@@ -66,8 +67,10 @@ public struct PageView<Content: View>: View {
             if isShowingIndicator {
                 PageViewIndicator(
                     subviewCount: numberOfSubviews,
-                    currentIndex: $index,
-                    isInteractionEnabled: isInteractionEnabled,
+                    externalIndex: $externalIndex,
+                    internalIndex: internalIndex,
+                    style: indicatorStyle,
+                    areIndicesInteractive: areIndicesInteractive,
                     pageSymbol: pageSymbol,
                     symbolSpacing: symbolSpacing,
                     indicatorSize: indicatorSize,
@@ -76,14 +79,14 @@ public struct PageView<Content: View>: View {
                 .padding(.bottom, indicatorOffset)
             }
         }
-        .sensoryFeedback(trigger: currentIndex) { _, _ in
+        .sensoryFeedback(trigger: internalIndex) { _, _ in
             return feedback
         }
         .task { @MainActor in
             isIgnoringChange = true
-            if index != 0 {
+            if externalIndex != 0 {
                 let maxIndex = numberOfSubviews - 1
-                let clampedIndex = min(max(index, 0), maxIndex)
+                let clampedIndex = min(max(externalIndex, 0), maxIndex)
                 updateIndex(to: clampedIndex)
             } else if defaultPage == .first {
                 updateIndex(to: 0)
@@ -92,8 +95,12 @@ public struct PageView<Content: View>: View {
             }
             isIgnoringChange = false
         }
-        .onChange(of: index) { oldIndex, newIndex in
-            guard !isIgnoringChange else { return }
+        .onChange(of: externalIndex) { oldIndex, newIndex in
+            guard !isIgnoringChange else {
+                isIgnoringChange = false
+                return
+            }
+            
             let maxIndex = numberOfSubviews - 1
             var adjustedNewIndex = newIndex
             
@@ -109,8 +116,10 @@ public struct PageView<Content: View>: View {
             
             if isLooping {
                 if oldIndex == maxIndex && adjustedNewIndex == 0 {
+                    isIgnoringChange = true
                     isMovingForward = true
                 } else if oldIndex == 0 && adjustedNewIndex == maxIndex {
+                    isIgnoringChange = true
                     isMovingForward = false
                 } else {
                     isMovingForward = adjustedNewIndex > oldIndex
@@ -119,36 +128,15 @@ public struct PageView<Content: View>: View {
                 isMovingForward = adjustedNewIndex > oldIndex
             }
             
-            /// Explanation of Task usage
-            /// https://stackoverflow.com/questions/77570188/swiftui-dynamic-transition-on-view-insertion-removal
-            Task { @MainActor in
-                withAnimation(animation) {
-                    updateIndex(to: adjustedNewIndex)
-                }
+            withAnimation(animation) {
+                updateIndex(to: adjustedNewIndex)
             }
         }
     }
-    
+
     private func updateIndex(to newIndex: Int) {
-        var adjustedIndex = newIndex
-        let maxIndex = numberOfSubviews - 1
-        
-        if isLooping {
-            if newIndex < 0 {
-                adjustedIndex = maxIndex
-            } else if newIndex > maxIndex {
-                adjustedIndex = 0
-            }
-        } else {
-            adjustedIndex = min(max(newIndex, 0), maxIndex)
-        }
-        
-        if adjustedIndex != index {
-            currentIndex = adjustedIndex
-            index = adjustedIndex
-        } else {
-            currentIndex = index
-        }
+        internalIndex = newIndex
+        externalIndex = newIndex
     }
 }
 
@@ -195,7 +183,6 @@ extension PageView {
     /// Configures a long press action for the page view indicator.
     /// - Parameter action: A closure to be executed when the page view indicator is long-pressed.
     /// - Returns: A modified instance of PageView with the specified long press action.
-    /// - Note: This action will work only if `interactionEnabled` is set to `true` for the page view indicator.
     public func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self {
         var copy = self
         copy.indicatorLongPressAction = action
@@ -212,14 +199,20 @@ extension PageView {
     }
     
     /// Configures the page view indicator's visibility and interaction.
-    /// - Parameters:
-    ///   - visibility: Determines whether the indicator is visible. Default is `.visible`.
-    ///   - interactionEnabled: A Boolean value that determines whether tapping on indicators changes the current page. Default is `false`.
+    /// - Parameter visibility: Determines whether the indicator is visible. Default is `.visible`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicator(visibility: Visibility = .visible, interactionEnabled: Bool = false) -> Self {
+    public func pageViewIndicatorVisibility(_ visibility: Visibility = .visible) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
-        copy.isInteractionEnabled = interactionEnabled
+        return copy
+    }
+    
+    /// Sets the visual style of the page view indicator.
+    /// - Parameter style: The style to apply to the page view indicator.
+    /// - Returns: A modified instance of PageView with the specified indicator style.
+    public func pageViewIndicatorStyle(_ style: PageViewIndicatorStyle) -> Self {
+        var copy = self
+        copy.indicatorStyle = style
         return copy
     }
     
@@ -228,16 +221,19 @@ extension PageView {
     ///   - pageSymbol: The SF Symbol name to use for page indicators. Default is "circle.fill".
     ///   - size: The size of the page indicator symbols. Default is `.regular`.
     ///   - spacing: The spacing between page indicator symbols. Default is `.default`.
+    ///   - interactionEnabled: A Boolean value that determines whether tapping on index icons changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator symbol, size, and spacing.
-    public func pageViewIndicatorSymbol(
+    public func pageViewIndicatorIndexSymbol(
         _ pageSymbol: String = "circle.fill",
         size: PageViewIndicatorSize = .regular,
-        spacing: PageViewIndicatorSymbolSpacing = .default
+        spacing: PageViewIndicatorSymbolSpacing = .default,
+        interactionEnabled: Bool = false
     ) -> Self {
         var copy = self
         copy.pageSymbol = pageSymbol
         copy.indicatorSize = size
         copy.symbolSpacing = spacing
+        copy.areIndicesInteractive = interactionEnabled
         return copy
     }
     

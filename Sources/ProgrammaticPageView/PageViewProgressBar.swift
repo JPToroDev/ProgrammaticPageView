@@ -23,7 +23,7 @@ struct PageViewProgressBar: View {
     @State private var barWidth: CGFloat = 0.0
     @State private var alignment: Alignment = .leading
     @State private var loopDirection: Direction?
-    @State private var cachedIncrements: Int = 0
+    @State private var cachedIncrement: Int = 0
     
     private let animation: Animation = .default
     
@@ -93,11 +93,11 @@ struct PageViewProgressBar: View {
                 progress = newProgress
             } completion: {
                 loopDirection = nil
-                if cachedIncrements != 0 {
+                if cachedIncrement != 0 {
                     self.alignment = .leading
                     withAnimation(animation) {
-                        updateProgress(by: cachedIncrements+1)
-                        cachedIncrements = 0
+                        updateProgress(by: cachedIncrement + 1)
+                        cachedIncrement = 0
                     }
                 }
             }
@@ -110,7 +110,7 @@ struct PageViewProgressBar: View {
         /// this method will block the second animation completion handler above.
         /// So we'll cache the changes and execute them in the handler.
         if loopDirection == .backward {
-            cachedIncrements -= 1
+            cachedIncrement -= 1
             return
         }
         alignment = .leading

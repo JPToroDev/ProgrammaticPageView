@@ -1,10 +1,3 @@
-//
-//  PageViewProgressBar.swift
-//  ProgrammaticPageView
-//
-//  Created by Joshua Toro on 10/10/24.
-//
-
 import SwiftUI
 
 /// A SwiftUI view that displays a progress bar for page views, including smooth transitions between pages.
@@ -15,25 +8,29 @@ struct PageViewProgressBar: View {
     /// The total number of pages in the view.
     var pageCount: Int
     
-    /// Represents the direction of the loop transition when moving between the first and last pages.
-    private enum LoopDirection {
-        case forward, backward
+    private enum AnimationPhase {
+        case updateProgress
+        case clearProgressFromTrailing
+        case switchAlignmentToLeading
+        case setProgressFromLeading
+        case clearProgressFromLeading
+        case switchAlignmentToTrailing
+        case setProgressFromTrailing
+        
+        var alignment: Alignment {
+            switch self {
+            case .updateProgress, .switchAlignmentToLeading, .setProgressFromLeading, .clearProgressFromLeading:
+                return .leading
+            case .clearProgressFromTrailing, .switchAlignmentToTrailing, .setProgressFromTrailing:
+                return .trailing
+            }
+        }
     }
     
-    /// The progress of the main bar, representing the current page position.
-    @State private var mainBarProgress: CGFloat = 0.0
-    /// The total width of the progress bar.
     @State private var progressBarWidth: CGFloat = 0.0
-    /// The current direction of the loop transition, if any.
-    @State private var loopDirection: LoopDirection?
-    /// Tracks pending index changes during rapid backwards transitions.
-    @State private var pendingIndexChange: Int = 0
-    /// Indicates whether a transition animation is currently in progress.
     @State private var isTransitioning: Bool = false
-    /// The progress of the transition bar during loop animations.
-    @State private var transitionBarProgress: CGFloat = 1.0
+    @State private var animationPhases: [AnimationPhase] = [.updateProgress]
     
-    /// The index of the last page in the view.
     private var lastPageIndex: Int {
         max(pageCount - 1, 0)
     }
@@ -41,101 +38,66 @@ struct PageViewProgressBar: View {
     // MARK: - Body
     
     var body: some View {
-        ZStack {
-            Capsule()
-                .frame(width: progressBarWidth * mainBarProgress)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            if isTransitioning {
-                Capsule()
-                    .frame(width: progressBarWidth * transitionBarProgress)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+        Capsule()
+            .fill(.white)
+            .phaseAnimator(animationPhases, trigger: isTransitioning) { content, phase in
+                content
+                    .frame(width: progressBarWidth * progress(for: phase))
+                    .frame(maxWidth: .infinity, alignment: phase.alignment)
+            } animation: { phase in
+                switch phase {
+                case .switchAlignmentToLeading, .switchAlignmentToTrailing:
+                    return nil
+                default:
+                    return .default
+                }
             }
-        }
-        .foregroundStyle(.white)
-        .frame(height: 8)
-        .background(.tertiary)
-        .clipShape(.capsule)
-        .onGeometryChange(for: CGFloat.self) { proxy in
-            proxy.size.width
-        } action: { width in
-            progressBarWidth = width
-        }
-        .onChange(of: pageCount, initial: true) {
-            updateMainBarProgress()
-        }
-        .onChange(of: currentIndex) { oldIndex, newIndex in
-            handlePageChange(from: oldIndex, to: newIndex)
-        }
+            .frame(height: 8)
+            .background(.tertiary)
+            .clipShape(.capsule)
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { width in
+                progressBarWidth = width
+            }
+            .onChange(of: currentIndex) { oldIndex, newIndex in
+                handlePageChange(from: oldIndex, to: newIndex)
+            }
     }
     
     // MARK: - Private Methods
     
-    /// Updates the progress of the main bar.
-    /// - Parameter increment: The number of increments to add to the current index.
-    private func updateMainBarProgress(by increment: Int = 1) {
-        guard pageCount > 0 else { return }
-        mainBarProgress = CGFloat(currentIndex + increment) / CGFloat(pageCount)
+    private func progress(for phase: AnimationPhase) -> CGFloat {
+        guard pageCount > 0 else { return 0 }
+        switch phase {
+        case .updateProgress, .setProgressFromLeading:
+            return CGFloat(currentIndex + 1) / CGFloat(pageCount)
+        case .clearProgressFromTrailing, .clearProgressFromLeading, .switchAlignmentToLeading, .switchAlignmentToTrailing:
+            return 0
+        case .setProgressFromTrailing:
+            return 1
+        }
     }
     
-    /// Handles changes in the current page index, managing transitions and updates.
-    /// - Parameters:
-    ///   - oldValue: The previous page index.
-    ///   - newValue: The new page index.
-    private func handlePageChange(from oldValue: Int, to newValue: Int) {
+    private func handlePageChange(from oldIndex: Int, to newIndex: Int) {
         guard pageCount > 0 else { return }
-        let adjustedOldIndex = oldValue.clamped(to: 0...lastPageIndex)
-        let adjustedNewIndex = newValue.clamped(to: 0...lastPageIndex)
+        let adjustedOldIndex = oldIndex.clamped(to: 0...lastPageIndex)
+        let adjustedNewIndex = newIndex.clamped(to: 0...lastPageIndex)
         
         if adjustedNewIndex == 0 && adjustedOldIndex == lastPageIndex {
-            animateProgressTransition(.forward)
+            animateProgressTransition(toStart: true)
         } else if adjustedNewIndex == lastPageIndex && adjustedOldIndex == 0 {
-            animateProgressTransition(.backward)
-        } else {
-            animateMainBarUpdate()
+            animateProgressTransition(toStart: false)
         }
     }
     
-    /// Animates the progress bar transition when looping between first and last pages.
-    /// - Parameter direction: The direction of the loop transition.
-    private func animateProgressTransition(_ direction: LoopDirection) {
-        if direction == .forward {
-            mainBarProgress = 0
-            transitionBarProgress = 1
-            isTransitioning = true
-            withAnimation {
-                transitionBarProgress = 0
-            } completion: {
-                isTransitioning = false
-                guard mainBarProgress == 0 else { return }
-                animateMainBarUpdate()
-            }
+    private func animateProgressTransition(toStart: Bool) {
+        if toStart {
+            animationPhases = [.updateProgress, .clearProgressFromTrailing, .switchAlignmentToLeading, .setProgressFromLeading]
         } else {
-            loopDirection = direction
-            withAnimation { mainBarProgress = 0 }
-            transitionBarProgress = 0
-            isTransitioning = true
-            withAnimation {
-                transitionBarProgress = 1
-            } completion: {
-                mainBarProgress = 1
-                withAnimation { updateMainBarProgress(by: pendingIndexChange) }
-                pendingIndexChange = 1
-                loopDirection = nil
-                isTransitioning = false
-            }
+            animationPhases = [.updateProgress, .clearProgressFromLeading, .switchAlignmentToTrailing, .setProgressFromTrailing]
         }
-    }
-    
-    /// Animates a regular progress update for the main bar.
-    private func animateMainBarUpdate() {
-        // If transitioning backward rapidly, cache changes to avoid animation conflicts
-        if loopDirection == .backward {
-            pendingIndexChange -= 1
-            return
-        }
-        withAnimation {
-            updateMainBarProgress()
-        }
+        isTransitioning.toggle()
     }
 }
 

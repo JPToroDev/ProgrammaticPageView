@@ -37,7 +37,7 @@ public struct PageView<Content: View>: View {
     private var forwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
     private var backwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))
     private var animation: Animation? = .default
-    private var indicatorStyle: PageViewIndicatorStyle = .dots
+    private var indicatorStyle: PageViewIndicatorStyle = .dotIndicator
     private var areIndicesInteractive: Bool = false
     private var feedback: SensoryFeedback? = .impact
     private var isShowingIndicator: Bool = false

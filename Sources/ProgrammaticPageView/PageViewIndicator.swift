@@ -66,10 +66,10 @@ struct PageViewIndicator: View {
     
     var body: some View {
         Group {
-            if case .bar(let width) = style {
+            if case .progressBar(let width) = style {
                 progressBar(width: width)
             } else {
-                dotIndices
+                dotIndicator
             }
         }
         .padding(.vertical, 8)
@@ -95,7 +95,7 @@ struct PageViewIndicator: View {
         }
     }
     
-    private var dotIndices: some View {
+    private var dotIndicator: some View {
         HStack(spacing: symbolSpacing.size) {
             ForEach(0..<subviewCount, id: \.self) { index in
                 Image(systemName: indexSymbol)
@@ -114,7 +114,7 @@ struct PageViewIndicator: View {
     }
     
     private func progressBar(width: CGFloat) -> some View {
-        PageViewProgressBar(currentIndex: internalIndex, totalPages: subviewCount)
+        PageViewProgressBar(currentIndex: internalIndex, pageCount: subviewCount)
             .frame(maxWidth: width)
     }
 }

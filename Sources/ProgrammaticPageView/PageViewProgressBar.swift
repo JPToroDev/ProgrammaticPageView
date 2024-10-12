@@ -7,118 +7,139 @@
 
 import SwiftUI
 
-/// A SwiftUI view that displays a progress bar for page views.
+/// A SwiftUI view that displays a progress bar for page views, including smooth transitions between pages.
 struct PageViewProgressBar: View {
     
-    /// The current page index.
+    /// The index of the currently displayed page.
     var currentIndex: Int
-    /// The total number of pages.
-    var totalPages: Int
+    /// The total number of pages in the view.
+    var pageCount: Int
     
-    private enum Direction {
+    /// Represents the direction of the loop transition when moving between the first and last pages.
+    private enum LoopDirection {
         case forward, backward
     }
     
-    @State private var progress: CGFloat = 0.0
-    @State private var barWidth: CGFloat = 0.0
-    @State private var alignment: Alignment = .leading
-    @State private var loopDirection: Direction?
-    @State private var cachedIncrement: Int = 0
+    /// The progress of the main bar, representing the current page position.
+    @State private var mainBarProgress: CGFloat = 0.0
+    /// The total width of the progress bar.
+    @State private var progressBarWidth: CGFloat = 0.0
+    /// The current direction of the loop transition, if any.
+    @State private var loopDirection: LoopDirection?
+    /// Tracks pending index changes during rapid backwards transitions.
+    @State private var pendingIndexChange: Int = 0
+    /// Indicates whether a transition animation is currently in progress.
+    @State private var isTransitioning: Bool = false
+    /// The progress of the transition bar during loop animations.
+    @State private var transitionBarProgress: CGFloat = 1.0
     
-    private let animation: Animation = .default
-    
-    private var maxIndex: Int {
-        max(totalPages - 1, 0)
+    /// The index of the last page in the view.
+    private var lastPageIndex: Int {
+        max(pageCount - 1, 0)
     }
+    
+    // MARK: - Body
     
     var body: some View {
-        Capsule()
-            .foregroundStyle(.white)
-            .frame(width: barWidth * progress, height: 8)
-            .frame(maxWidth: .infinity, alignment: alignment)
-            .background(.tertiary)
-            .clipShape(.capsule)
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.width
-            } action: { width in
-                barWidth = width
+        ZStack {
+            Capsule()
+                .frame(width: progressBarWidth * mainBarProgress)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            if isTransitioning {
+                Capsule()
+                    .frame(width: progressBarWidth * transitionBarProgress)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            .onAppear { updateProgress() }
-            .onChange(of: currentIndex) { oldIndex, newIndex in
-                handleIndexChange(oldValue: oldIndex, newValue: newIndex)
-            }
+        }
+        .foregroundStyle(.white)
+        .frame(height: 8)
+        .background(.tertiary)
+        .clipShape(.capsule)
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { width in
+            progressBarWidth = width
+        }
+        .onChange(of: pageCount, initial: true) {
+            updateMainBarProgress()
+        }
+        .onChange(of: currentIndex) { oldIndex, newIndex in
+            handlePageChange(from: oldIndex, to: newIndex)
+        }
     }
     
-    /// Updates the progress of the bar.
+    // MARK: - Private Methods
+    
+    /// Updates the progress of the main bar.
     /// - Parameter increment: The number of increments to add to the current index.
-    private func updateProgress(by increment: Int = 1) {
-        guard totalPages > 0 else { return }
-        progress = CGFloat(currentIndex + increment) / CGFloat(totalPages)
+    private func updateMainBarProgress(by increment: Int = 1) {
+        guard pageCount > 0 else { return }
+        mainBarProgress = CGFloat(currentIndex + increment) / CGFloat(pageCount)
     }
     
-    /// Handles changes in the current index.
+    /// Handles changes in the current page index, managing transitions and updates.
     /// - Parameters:
-    ///   - oldValue: The previous index value.
-    ///   - newValue: The new index value.
-    private func handleIndexChange(oldValue: Int, newValue: Int) {
-        guard totalPages > 0 else { return }
-        let adjustedOldIndex = oldValue.clamped(to: 0...maxIndex)
-        let adjustedNewIndex = newValue.clamped(to: 0...maxIndex)
+    ///   - oldValue: The previous page index.
+    ///   - newValue: The new page index.
+    private func handlePageChange(from oldValue: Int, to newValue: Int) {
+        guard pageCount > 0 else { return }
+        let adjustedOldIndex = oldValue.clamped(to: 0...lastPageIndex)
+        let adjustedNewIndex = newValue.clamped(to: 0...lastPageIndex)
         
-        if adjustedNewIndex == 0 && adjustedOldIndex == maxIndex {
-            animateProgressReset(.trailing)
-        } else if adjustedNewIndex == maxIndex && adjustedOldIndex == 0 {
-            animateProgressReset(.leading)
+        if adjustedNewIndex == 0 && adjustedOldIndex == lastPageIndex {
+            animateProgressTransition(.forward)
+        } else if adjustedNewIndex == lastPageIndex && adjustedOldIndex == 0 {
+            animateProgressTransition(.backward)
         } else {
-            animateProgressUpdate()
+            animateMainBarUpdate()
         }
     }
     
-    /// Animates the progress bar reset.
-    /// - Parameter alignment: The new alignment for the progress bar.
-    private func animateProgressReset(_ alignment: Alignment) {
-        loopDirection = alignment == .trailing ? .forward : .backward
-        self.alignment = alignment
-        withAnimation(animation) {
-            progress = 0.0
-        } completion: {
-            let newProgress = alignment == .trailing ? 1.0 / CGFloat(totalPages) : 1.0
-            /// If looping is enabled and the index is increasing rapidly, this progress
-            /// might be outdated by the time this handler is called.
-            if alignment == .trailing {
-                guard newProgress > progress else { return }
-            }
-            self.alignment = alignment == .leading ? .trailing : .leading
-            withAnimation(animation) {
-                progress = newProgress
+    /// Animates the progress bar transition when looping between first and last pages.
+    /// - Parameter direction: The direction of the loop transition.
+    private func animateProgressTransition(_ direction: LoopDirection) {
+        if direction == .forward {
+            mainBarProgress = 0
+            transitionBarProgress = 1
+            isTransitioning = true
+            withAnimation {
+                transitionBarProgress = 0
             } completion: {
+                isTransitioning = false
+                guard mainBarProgress == 0 else { return }
+                animateMainBarUpdate()
+            }
+        } else {
+            loopDirection = direction
+            withAnimation { mainBarProgress = 0 }
+            transitionBarProgress = 0
+            isTransitioning = true
+            withAnimation {
+                transitionBarProgress = 1
+            } completion: {
+                mainBarProgress = 1
+                withAnimation { updateMainBarProgress(by: pendingIndexChange) }
+                pendingIndexChange = 1
                 loopDirection = nil
-                if cachedIncrement != 0 {
-                    self.alignment = .leading
-                    withAnimation(animation) {
-                        updateProgress(by: cachedIncrement + 1)
-                        cachedIncrement = 0
-                    }
-                }
+                isTransitioning = false
             }
         }
     }
     
-    /// Animates a regular progress update.
-    private func animateProgressUpdate() {
-        /// If looping is enabled and the index is decreasing rapidly,
-        /// this method will block the second animation completion handler above.
-        /// So we'll cache the changes and execute them in the handler.
+    /// Animates a regular progress update for the main bar.
+    private func animateMainBarUpdate() {
+        // If transitioning backward rapidly, cache changes to avoid animation conflicts
         if loopDirection == .backward {
-            cachedIncrement -= 1
+            pendingIndexChange -= 1
             return
         }
-        alignment = .leading
-        withAnimation(animation) {
-            updateProgress()
+        withAnimation {
+            updateMainBarProgress()
         }
     }
 }
+
+// MARK: - Extensions
 
 private extension Comparable {
     /// Clamps the value within the given range.

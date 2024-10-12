@@ -83,9 +83,10 @@ struct OnboardingView: View {
                 }
             }
         }
-        .pageViewIndicator(visibility: .visible, interactionEnabled: true)
-        .pageViewIndicatorSymbol("square.fill", size: .large)
-        .pageViewIndicatorBackground(Color.blue.opacity(0.2))
+        .pageViewIndicatorVisibility(.visible)
+        .pageViewIndicatorIndexSymbol("square.fill", size: .large)
+        .pageViewIndicatorStyle(.progressBar)
+        .pageViewIndicatorBackground(Color.blue)
         .pageViewIndicatorOffset(20)
     }
 }

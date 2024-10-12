@@ -2,7 +2,7 @@
 //  PageViewIndicatorSymbolSpacing.swift
 //  ProgrammaticPageView
 //
-//  Created by Joshua Toro on 10/8/24.
+//  Created by JP Toro on 10/8/24.
 //
 
 import Foundation

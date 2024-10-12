@@ -1,3 +1,10 @@
+//
+//  PageViewIndicatorSymbolSpacing.swift
+//  ProgrammaticPageView
+//
+//  Created by JP Toro on 10/8/24.
+//
+
 import SwiftUI
 
 /// A SwiftUI view that displays a progress bar for page views, including smooth transitions between pages.

@@ -16,7 +16,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 - 🔁 Optional looping
 - 🧩 Dynamic content handling
 - 🔒 Fine-grained navigation control
-- 🎨 Customizable page indicator
+- 🎨 Customizable indicator styling and gestures
 
 ## Why ProgrammaticPageView?
 
@@ -160,7 +160,14 @@ func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self
 ```
 
 Configures a long press action for the page view indicator.
-  - `action`: A closure to be executed when the page view indicator is long-pressed.
+- `action`: A closure to be executed when the page view indicator is long-pressed.
+
+```swift
+func pageViewIndicatorTapAction(_ action: (() -> Void)? = nil) -> Self
+```
+
+Configures a long press action for the page view indicator.
+- `action`: A closure to be executed when the page view indicator is tapped.
 
 ```swift
 func pageViewIndicatorIndexSymbol(_ symbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default, interactionEnabled: Bool = false) -> Self
@@ -170,7 +177,7 @@ Configures the page view indicator's symbol, size, and spacing.
 - `symbol`: The SF Symbol name to use for page indicators. Default is "circle.fill".
 - `size`: The size of the page indicator symbols. Default is `.regular`.
 - `spacing`: The spacing between page indicator symbols. Default is `.default`.
-- `interactionEnabled`: A Boolean value that determines whether tapping on index icons changes the current page. Default is `false`.
+- `interactionEnabled`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
 
 ```swift
 pageViewIndicatorBackground<S: ShapeStyle>(_ background: S?) -> Self

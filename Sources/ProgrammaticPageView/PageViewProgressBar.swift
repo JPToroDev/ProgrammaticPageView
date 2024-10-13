@@ -42,8 +42,6 @@ struct PageViewProgressBar: View {
         max(pageCount - 1, 0)
     }
     
-    // MARK: - Body
-    
     var body: some View {
         Capsule()
             .fill(.white)
@@ -71,8 +69,6 @@ struct PageViewProgressBar: View {
                 handlePageChange(from: oldIndex, to: newIndex)
             }
     }
-    
-    // MARK: - Private Methods
     
     private func progress(for phase: AnimationPhase) -> CGFloat {
         guard pageCount > 0 else { return 0 }
@@ -107,8 +103,6 @@ struct PageViewProgressBar: View {
         isTransitioning.toggle()
     }
 }
-
-// MARK: - Extensions
 
 private extension Comparable {
     /// Clamps the value within the given range.

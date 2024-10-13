@@ -40,15 +40,23 @@ struct PageViewIndicator: View {
     /// The background style for the page view indicator.
     var indicatorBackgroundStyle: AnyShapeStyle?
     
+    /// An action to perform when the indicator is tapped.
+    var indicatorTapAction: (() -> Void)?
+    
+    /// An action to perform when the indicator is long-pressed.
     var indicatorLongPressAction: (() -> Void)?
     
     private enum LongPressPhase {
         case inactive, pressing, pressed
     }
     
+    @State private var dragLocation: CGPoint = .zero
+    @State private var indicatorSize: CGSize = .zero
     @State private var longPressPhase: LongPressPhase = .inactive
+    @State private var indicatorTapped: Bool = false
+    @State private var feedback: SensoryFeedback?
     
-    private var maxScale: CGFloat {
+    private var longPressScale: CGFloat {
         switch longPressPhase {
         case .inactive: return 1
         case .pressing: return 1.05
@@ -56,15 +64,36 @@ struct PageViewIndicator: View {
         }
     }
     
-    private var animationSpeed: Double {
+    private var longPressSpeed: Double {
         switch longPressPhase {
-        case .inactive: return 1
         case .pressing: return 0.2
-        case .pressed:  return 1
+        default: return 1
         }
     }
     
     var body: some View {
+        
+        let tapGesture = TapGesture()
+            .onEnded { _ in
+                feedback = .impact
+                indicatorTapAction?()
+                let animation: Animation = .spring.speed(3)
+                withAnimation(animation) { indicatorTapped = true } completion: {
+                    withAnimation(animation) {
+                        feedback = nil
+                        indicatorTapped = false
+                    }
+                }
+            }
+        
+        let dragGesture = DragGesture(minimumDistance: 5)
+            .onChanged { value in
+                handleDrag(value)
+            }
+            .onEnded { value in
+                handleDragEnd(value)
+            }
+        
         Group {
             if case .progressBar(let width) = style {
                 progressBar(width: width)
@@ -77,21 +106,37 @@ struct PageViewIndicator: View {
         .background {
             Capsule()
                 .fill(indicatorBackgroundStyle.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.clear))
-                .colorMultiply(longPressPhase != .inactive ? Color.gray.mix(with: .white, by: 0.8) : .white)
+                .overlay(
+                    Capsule()
+                        .fill(Material.thin)
+                        .opacity(longPressPhase != .inactive || indicatorTapped ? 1 : 0)
+                )
         }
-        .scaleEffect(maxScale)
-        .animation(.spring(response: 0.4, dampingFraction: 0.6).speed(animationSpeed), value: longPressPhase)
-        .sensoryFeedback(trigger: longPressPhase) { _, phase in
-            phase == .pressed ? .success : .none
-        }
+        .scaleEffect(longPressScale)
+        .scaleEffect(indicatorTapped ? 1.075 : 1)
+        .animation(.spring(response: 0.4, dampingFraction: 0.6).speed(longPressSpeed), value: longPressPhase)
         .if(indicatorLongPressAction != nil) { content in
+            // There is a bug preventing LongPressGesture() from working,
+            // so we'll use the gesture's modifier variant conditionally
             content
                 .onLongPressGesture(minimumDuration: 0.5) {
+                    feedback = .success
                     longPressPhase = .pressed
                     indicatorLongPressAction?()
                 } onPressingChanged: { isInProgress in
+                    feedback = nil
                     longPressPhase = isInProgress ? .pressing : .inactive
                 }
+        }
+        .onGeometryChange(for: CGSize.self) { proxy in
+            return proxy.size
+        } action: { size in
+            indicatorSize = size
+        }
+        .gesture(dragGesture, isEnabled: areIndicesInteractive)
+        .gesture(tapGesture, isEnabled: indicatorTapAction != nil)
+        .sensoryFeedback(trigger: feedback) { _, feedback in
+            return feedback
         }
     }
     
@@ -103,12 +148,6 @@ struct PageViewIndicator: View {
                     .foregroundStyle(externalIndex == index ? .white : Color(.tertiaryLabel))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: externalIndex == index)
                     .animation(nil, value: longPressPhase)
-                    .if(areIndicesInteractive) { content in
-                        content
-                            .onTapGesture {
-                                externalIndex = index
-                            }
-                    }
             }
         }
     }
@@ -116,6 +155,49 @@ struct PageViewIndicator: View {
     private func progressBar(width: CGFloat) -> some View {
         PageViewProgressBar(currentIndex: internalIndex, pageCount: subviewCount)
             .frame(maxWidth: width)
+    }
+    
+    private func handleDrag(_ value: DragGesture.Value) {
+        dragLocation = value.location
+        
+        if case .progressBar = style {
+            handleProgressBarDrag(value)
+        } else {
+            updateIndexBasedOnDrag()
+        }
+    }
+    
+    private func handleProgressBarDrag(_ value: DragGesture.Value) {
+        let adjustedX = value.location.x
+        let clampedX = max(0, min(adjustedX, indicatorSize.width))
+        let proportion = clampedX / indicatorSize.width
+        let calculatedIndex = Int((proportion * CGFloat(subviewCount)).rounded())
+        let newIndex = max(0, min(subviewCount - 1, calculatedIndex))
+
+        if newIndex != externalIndex {
+            externalIndex = newIndex
+        }
+    }
+    
+    private func handleDragEnd(_ value: DragGesture.Value) {
+        dragLocation = .zero
+    }
+    
+    private func updateIndexBasedOnDrag() {
+        guard indicatorSize.width > 0 else { return }
+
+        let totalDots = CGFloat(subviewCount)
+        let totalSpacing = CGFloat(subviewCount - 1) * symbolSpacing.size
+        let combinedWidth = (totalDots * symbolSize.pointSize) + totalSpacing
+        let scale = indicatorSize.width / combinedWidth
+
+        let scaledUnitWidth = (symbolSize.pointSize + symbolSpacing.size) * scale
+        let adjustedX = max(0, min(dragLocation.x, indicatorSize.width))
+
+        let floatIndex = adjustedX / scaledUnitWidth
+        let index = Int(floatIndex.rounded())
+
+        externalIndex = min(max(index, 0), subviewCount - 1)
     }
 }
 

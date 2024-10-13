@@ -46,6 +46,7 @@ public struct PageView<Content: View>: View {
     private var indicatorOffset: CGFloat = 0
     private var indicatorSize: PageViewIndicatorSize = .regular
     private var indicatorLongPressAction: (() -> Void)?
+    private var indicatorTapAction: (() -> Void)?
     private var indicatorBackgroundStyle: AnyShapeStyle? = AnyShapeStyle(Material.regular)
     
     private var transition: AnyTransition {
@@ -75,6 +76,7 @@ public struct PageView<Content: View>: View {
                     symbolSpacing: symbolSpacing,
                     symbolSize: indicatorSize,
                     indicatorBackgroundStyle: indicatorBackgroundStyle,
+                    indicatorTapAction: indicatorTapAction,
                     indicatorLongPressAction: indicatorLongPressAction)
                 .padding(.bottom, indicatorOffset)
             }
@@ -189,6 +191,15 @@ extension PageView {
         return copy
     }
     
+    /// Configures a tap action for the page view indicator.
+    /// - Parameter action: A closure to be executed when the page view indicator is tapped.
+    /// - Returns: A modified instance with the specified tap action.
+    public func pageViewIndicatorTapAction(_ action: (() -> Void)? = nil) -> Self {
+        var copy = self
+        copy.indicatorTapAction = action
+        return copy
+    }
+    
     /// Sets the haptic feedback for page transitions in the page view.
     /// - Parameter feedback: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback.
     /// - Returns: A modified instance of PageView with the specified feedback configuration.
@@ -221,7 +232,7 @@ extension PageView {
     ///   - symbol: The SF Symbol name to use for page indicators. Default is "circle.fill".
     ///   - size: The size of the page indicator symbols. Default is `.regular`.
     ///   - spacing: The spacing between page indicator symbols. Default is `.default`.
-    ///   - interactionEnabled: A Boolean value that determines whether tapping on index icons changes the current page. Default is `false`.
+    ///   - interactionEnabled: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator symbol, size, and spacing.
     public func pageViewIndicatorIndexSymbol(
         _ symbol: String = "circle.fill",

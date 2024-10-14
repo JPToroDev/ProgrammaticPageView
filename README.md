@@ -94,7 +94,7 @@ struct OnboardingView: View {
 
 ## API Reference
 
-### Initializer
+### Initializers
 
 ```swift
 public init(

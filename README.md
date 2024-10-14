@@ -100,13 +100,15 @@ struct OnboardingView: View {
 public init(
     index: Binding<Int>,
     loops: Bool = false,
-    @ViewBuilder content: () -> Content
+    @ViewBuilder content: () -> Content,
+    indicator: ((PageViewIndicator) -> Indicator)? = { _ in EmptyView() }
 )
 ```
 
 - `index`: A binding to the current page index.
 - `loops`: Set to `true` to enable looping from the last page to the first.
 - `content`: A closure that returns the views for each page.
+- `indicator`: A closure that takes a `PageViewIndicator` and returns a custom indicator view. If nil, the indicator's visibility is determined by `pageViewIndicatorVisibility()`.
 
 ### Methods
 

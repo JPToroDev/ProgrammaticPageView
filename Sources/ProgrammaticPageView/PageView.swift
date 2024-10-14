@@ -4,21 +4,24 @@
 import SwiftUI
 
 /// A view that displays a pager of subviews, allowing users to navigate between them programmatically with custom transitions.
-public struct PageView<Content: View>: View {
+public struct PageView<Content: View, Indicator: View>: View {
     
     /// Creates a pager view with the specified parameters.
     /// - Parameters:
     ///   - index: A binding to the current index of the pager.
     ///   - loops: A Boolean value indicating whether the pager should loop from the last item back to the first.
     ///   - content: A view builder that creates the content of the pager.
+    ///   - indicator: A closure that takes a `PageViewIndicator` and returns a view, allowing direct modification of the indicator. If `nil`, the indicator's visibility is determined by `pageViewIndicatorVisibility()`.
     public init(
         index: Binding<Int>,
         loops: Bool = false,
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: () -> Content,
+        indicator: ((PageViewIndicator) -> Indicator)? = { _ in EmptyView() }
     ) {
         self._externalIndex = index
         self.isLooping = loops
         self.content = content()
+        self.indicatorProxy = indicator
     }
     
     /// A binding to the current index of the pager.
@@ -27,6 +30,8 @@ public struct PageView<Content: View>: View {
     public var isLooping: Bool
     /// The content of the pager.
     @ViewBuilder public var content: Content
+    /// A closure for custom modification of the page view indicator. If `nil`, visibility is controlled by `pageViewIndicatorVisibility()`.
+    public var indicatorProxy: ((PageViewIndicator) -> Indicator)?
     
     @State private var internalIndex: Int = 0
     @State private var isMovingForward: Bool = true
@@ -54,6 +59,20 @@ public struct PageView<Content: View>: View {
     }
     
     public var body: some View {
+        
+        let indicator = PageViewIndicator(
+            subviewCount: numberOfSubviews,
+            externalIndex: $externalIndex,
+            internalIndex: internalIndex,
+            style: indicatorStyle,
+            areIndicesInteractive: areIndicesInteractive,
+            indexSymbol: indexSymbol,
+            symbolSpacing: symbolSpacing,
+            symbolSize: indicatorSize,
+            indicatorBackgroundStyle: indicatorBackgroundStyle,
+            indicatorTapAction: indicatorTapAction,
+            indicatorLongPressAction: indicatorLongPressAction)
+        
         ZStack(alignment: .bottom) {
             Group(subviews: content) { subviews in
                 ForEach(Array(subviews.enumerated()), id: \.offset) { index, subview in
@@ -65,21 +84,15 @@ public struct PageView<Content: View>: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            if isShowingIndicator {
-                PageViewIndicator(
-                    subviewCount: numberOfSubviews,
-                    externalIndex: $externalIndex,
-                    internalIndex: internalIndex,
-                    style: indicatorStyle,
-                    areIndicesInteractive: areIndicesInteractive,
-                    indexSymbol: indexSymbol,
-                    symbolSpacing: symbolSpacing,
-                    symbolSize: indicatorSize,
-                    indicatorBackgroundStyle: indicatorBackgroundStyle,
-                    indicatorTapAction: indicatorTapAction,
-                    indicatorLongPressAction: indicatorLongPressAction)
-                .padding(.bottom, indicatorOffset)
+            
+            Group {
+                if let proxy = indicatorProxy {
+                    proxy(indicator)
+                } else if isShowingIndicator {
+                    indicator
+                }
             }
+            .padding(.bottom, indicatorOffset)
         }
         .sensoryFeedback(trigger: internalIndex) { _, _ in
             return feedback

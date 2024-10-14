@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Displays a customizable page indicator for multi-page views.
-struct PageViewIndicator: View {
+public struct PageViewIndicator: View {
     /// The total number of pages to represent.
     var subviewCount: Int
     
@@ -71,7 +71,7 @@ struct PageViewIndicator: View {
         }
     }
     
-    var body: some View {
+    public var body: some View {
         
         let tapGesture = TapGesture()
             .onEnded { _ in

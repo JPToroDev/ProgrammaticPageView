@@ -207,7 +207,7 @@ extension PageView {
     /// Configures a tap action for the page view indicator.
     /// - Parameter action: A closure to be executed when the page view indicator is tapped.
     /// - Returns: A modified instance with the specified tap action.
-    public func pageViewIndicatorTapAction(_ action: (() -> Void)? = nil) -> Self {
+    public func pageViewIndicatorTapAction(_ action: @escaping () -> Void) -> Self {
         var copy = self
         copy.indicatorTapAction = action
         return copy

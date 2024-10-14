@@ -165,7 +165,7 @@ Configures a long press action for the page view indicator.
 - `action`: A closure to be executed when the page view indicator is long-pressed.
 
 ```swift
-func pageViewIndicatorTapAction(_ action: (() -> Void)? = nil) -> Self
+func pageViewIndicatorTapAction(_ action: @escaping () -> Void) -> Self
 ```
 
 Configures a long press action for the page view indicator.

@@ -130,7 +130,7 @@ Sets a single transition for both forward and backward page changes and an optio
 - `animation`: An optional animation to apply during page transitions.
 
 ```swift
-defaultPage(_ page: Page = .first) -> Self
+defaultPage(_ page: Page) -> Self
 ```
 
 Sets the default page without animation. This will be overridden if `index` is not zero.
@@ -144,7 +144,7 @@ Sets the visual style of the page view indicator.
   - `style`: The style to apply to the page view indicator.
 
 ```swift
-pageViewIndicatorVisibility(_ visibility: Visibility = .visible) -> Self
+pageViewIndicatorVisibility(_ visibility: Visibility) -> Self
 ```
 
 Configures the page view indicator's visibility and interaction.

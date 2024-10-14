@@ -189,7 +189,7 @@ extension PageView {
     /// Sets the default page without an animation. This will be overridden if `index` is not zero.
     /// - Parameter page: The default page to display.
     /// - Returns: A modified instance of PageView with the default page set.
-    public func defaultPage(_ page: Page = .first) -> Self {
+    public func defaultPage(_ page: Page) -> Self {
         var copy = self
         copy.defaultPage = page
         return copy
@@ -223,9 +223,9 @@ extension PageView {
     }
     
     /// Configures the page view indicator's visibility and interaction.
-    /// - Parameter visibility: Determines whether the indicator is visible. Default is `.visible`.
+    /// - Parameter visibility: Determines whether the indicator is visible.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicatorVisibility(_ visibility: Visibility = .visible) -> Self {
+    public func pageViewIndicatorVisibility(_ visibility: Visibility) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
         return copy

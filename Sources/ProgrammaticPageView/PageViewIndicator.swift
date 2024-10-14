@@ -171,8 +171,8 @@ public struct PageViewIndicator: View {
         let adjustedX = value.location.x
         let clampedX = max(0, min(adjustedX, indicatorSize.width))
         let proportion = clampedX / indicatorSize.width
-        let calculatedIndex = Int((proportion * CGFloat(subviewCount)).rounded())
-        let newIndex = max(0, min(subviewCount - 1, calculatedIndex))
+        let calculatedIndex = min(Int(proportion * CGFloat(subviewCount)), subviewCount - 1)
+        let newIndex = calculatedIndex
 
         if newIndex != externalIndex {
             externalIndex = newIndex

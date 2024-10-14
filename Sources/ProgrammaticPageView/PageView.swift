@@ -11,17 +11,33 @@ public struct PageView<Content: View, Indicator: View>: View {
     ///   - index: A binding to the current index of the pager.
     ///   - loops: A Boolean value indicating whether the pager should loop from the last item back to the first.
     ///   - content: A view builder that creates the content of the pager.
-    ///   - indicator: A closure that takes a `PageViewIndicator` and returns a view, allowing direct modification of the indicator. If `nil`, the indicator's visibility is determined by `pageViewIndicatorVisibility()`.
+    ///   - indicator: A view builder that takes a `PageViewIndicator` and returns a custom indicator view. Use this to directly modify or replace the default indicator.
     public init(
         index: Binding<Int>,
         loops: Bool = false,
         @ViewBuilder content: () -> Content,
-        indicator: ((PageViewIndicator) -> Indicator)? = { _ in EmptyView() }
+        @ViewBuilder indicator: @escaping (PageViewIndicator) -> Indicator
     ) {
         self._externalIndex = index
         self.isLooping = loops
         self.content = content()
         self.indicatorProxy = indicator
+    }
+    
+    /// Creates a pager view with the specified parameters and no custom indicator.
+    /// - Parameters:
+    ///   - index: A binding to the current index of the pager.
+    ///   - loops: A Boolean value indicating whether the pager should loop from the last item back to the first.
+    ///   - content: A view builder that creates the content of the pager.
+    public init(
+        index: Binding<Int>,
+        loops: Bool = false,
+        @ViewBuilder content: () -> Content
+    ) where Indicator == EmptyView {
+        self._externalIndex = index
+        self.isLooping = loops
+        self.content = content()
+        self.indicatorProxy = nil
     }
     
     /// A binding to the current index of the pager.

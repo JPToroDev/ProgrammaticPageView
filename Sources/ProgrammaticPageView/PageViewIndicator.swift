@@ -21,10 +21,10 @@ public struct PageViewIndicator: View {
     /// Determines the visual appearance of the page indicator (dots or progress bar).
     var style: PageViewIndicatorStyle
     
-    /// A Boolean value that determines whether tapping on index icons changes the current page.
+    /// A Boolean value that determines whether dragging on the indicator changes the current page.
     ///
-    /// When `true`, tapping an index icon will update `currentIndex`.
-    var areIndicesInteractive: Bool
+    /// When `true`, dragging on the indicator will change `currentIndex`.
+    var isDragNavigationEnabled: Bool
     
     /// The SF Symbol name to use for indicator's indices.
     var indexSymbol: String
@@ -136,7 +136,7 @@ public struct PageViewIndicator: View {
         } action: { size in
             indicatorSize = size
         }
-        .gesture(dragGesture, isEnabled: areIndicesInteractive)
+        .gesture(dragGesture, isEnabled: isDragNavigationEnabled)
         .gesture(tapGesture, isEnabled: indicatorTapAction != nil)
         .sensoryFeedback(trigger: feedback) { _, feedback in
             return feedback

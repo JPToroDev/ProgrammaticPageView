@@ -153,11 +153,12 @@ Sets the visual style of the page view indicator.
   - `style`: The style to apply to the page view indicator.
 
 ```swift
-pageViewIndicatorVisibility(_ visibility: Visibility) -> Self
+pageViewIndicator(visibility: Visibility, dragNavigationEnabled: Bool = false) -> Self
 ```
 
 Configures the page view indicator's visibility and interaction.
 - `visibility`: Determines whether the indicator is visible.
+- `dragNavigationEnabled`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
 
 ```swift
 func pageViewFeedback(_ feedback: SensoryFeedback?) -> Self
@@ -181,14 +182,13 @@ Configures a long press action for the page view indicator.
 - `action`: A closure to be executed when the page view indicator is tapped.
 
 ```swift
-func pageViewIndicatorIndexSymbol(_ symbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default, interactionEnabled: Bool = false) -> Self
+func pageViewIndicatorIndexSymbol(_ symbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default) -> Self
 ```
 
 Configures the page view indicator's symbol, size, and spacing.
 - `symbol`: The SF Symbol name to use for page indicators. Default is "circle.fill".
 - `size`: The size of the page indicator symbols. Default is `.regular`.
 - `spacing`: The spacing between page indicator symbols. Default is `.default`.
-- `interactionEnabled`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
 
 ```swift
 pageViewIndicatorBackground<S: ShapeStyle>(_ background: S?) -> Self

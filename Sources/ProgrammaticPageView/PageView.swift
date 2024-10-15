@@ -60,7 +60,7 @@ public struct PageView<Content: View, Indicator: View>: View {
     private var backwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))
     private var animation: Animation? = .default
     private var indicatorStyle: PageViewIndicatorStyle = .dotIndicator
-    private var areIndicesInteractive: Bool = false
+    private var isDragNavigationEnabled: Bool = false
     private var feedback: SensoryFeedback? = .impact
     private var isShowingIndicator: Bool = false
     private var indexSymbol: String = "circle.fill"
@@ -82,7 +82,7 @@ public struct PageView<Content: View, Indicator: View>: View {
             externalIndex: $externalIndex,
             internalIndex: internalIndex,
             style: indicatorStyle,
-            areIndicesInteractive: areIndicesInteractive,
+            isDragNavigationEnabled: isDragNavigationEnabled,
             indexSymbol: indexSymbol,
             symbolSpacing: symbolSpacing,
             symbolSize: indicatorSize,
@@ -242,11 +242,14 @@ extension PageView {
     }
     
     /// Configures the page view indicator's visibility and interaction.
-    /// - Parameter visibility: Determines whether the indicator is visible.
+    /// - Parameters:
+    ///   - visibility: Determines whether the indicator is visible.
+    ///   - dragNavigationEnabled: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicatorVisibility(_ visibility: Visibility) -> Self {
+    public func pageViewIndicator(visibility: Visibility, dragNavigationEnabled: Bool = false) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
+        copy.isDragNavigationEnabled = dragNavigationEnabled
         return copy
     }
     
@@ -264,19 +267,16 @@ extension PageView {
     ///   - symbol: The SF Symbol name to use for page indicators. Default is "circle.fill".
     ///   - size: The size of the page indicator symbols. Default is `.regular`.
     ///   - spacing: The spacing between page indicator symbols. Default is `.default`.
-    ///   - interactionEnabled: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator symbol, size, and spacing.
     public func pageViewIndicatorIndexSymbol(
         _ symbol: String = "circle.fill",
         size: PageViewIndicatorSize = .regular,
-        spacing: PageViewIndicatorSymbolSpacing = .default,
-        interactionEnabled: Bool = false
+        spacing: PageViewIndicatorSymbolSpacing = .default
     ) -> Self {
         var copy = self
         copy.indexSymbol = symbol
         copy.indicatorSize = size
         copy.symbolSpacing = spacing
-        copy.areIndicesInteractive = interactionEnabled
         return copy
     }
     

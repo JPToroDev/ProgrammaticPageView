@@ -244,12 +244,12 @@ extension PageView {
     /// Configures the page view indicator's visibility and interaction.
     /// - Parameters:
     ///   - visibility: Determines whether the indicator is visible.
-    ///   - dragNavigationEnabled: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
+    ///   - dragToNavigate: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
     /// - Returns: A modified instance of PageView with the specified indicator configuration.
-    public func pageViewIndicator(visibility: Visibility, dragNavigationEnabled: Bool = false) -> Self {
+    public func pageViewIndicator(visibility: Visibility, dragToNavigate: Bool = false) -> Self {
         var copy = self
         copy.isShowingIndicator = visibility == .visible
-        copy.isDragNavigationEnabled = dragNavigationEnabled
+        copy.isDragNavigationEnabled = dragToNavigate
         return copy
     }
     

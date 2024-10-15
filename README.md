@@ -153,12 +153,12 @@ Sets the visual style of the page view indicator.
   - `style`: The style to apply to the page view indicator.
 
 ```swift
-pageViewIndicator(visibility: Visibility, dragNavigationEnabled: Bool = false) -> Self
+pageViewIndicator(visibility: Visibility, dragToNavigate: Bool = false) -> Self
 ```
 
 Configures the page view indicator's visibility and interaction.
 - `visibility`: Determines whether the indicator is visible.
-- `dragNavigationEnabled`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
+- `dragToNavigate`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
 
 ```swift
 func pageViewFeedback(_ feedback: SensoryFeedback?) -> Self

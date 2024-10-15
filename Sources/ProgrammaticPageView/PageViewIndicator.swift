@@ -71,9 +71,8 @@ public struct PageViewIndicator: View {
         }
     }
     
-    public var body: some View {
-        
-        let tapGesture = TapGesture()
+    private var tapGesture: some Gesture {
+        TapGesture()
             .onEnded { _ in
                 feedback = .impact
                 indicatorTapAction?()
@@ -85,15 +84,19 @@ public struct PageViewIndicator: View {
                     }
                 }
             }
-        
-        let dragGesture = DragGesture(minimumDistance: 5)
+    }
+    
+    private var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 5)
             .onChanged { value in
                 handleDrag(value)
             }
             .onEnded { value in
                 handleDragEnd(value)
             }
-        
+    }
+    
+    public var body: some View {
         Group {
             if case .progressBar(let width) = style {
                 progressBar(width: width)
@@ -173,7 +176,7 @@ public struct PageViewIndicator: View {
         let proportion = clampedX / indicatorSize.width
         let calculatedIndex = min(Int(proportion * CGFloat(subviewCount)), subviewCount - 1)
         let newIndex = calculatedIndex
-
+        
         if newIndex != externalIndex {
             externalIndex = newIndex
         }
@@ -185,18 +188,18 @@ public struct PageViewIndicator: View {
     
     private func updateIndexBasedOnDrag() {
         guard indicatorSize.width > 0 else { return }
-
+        
         let totalDots = CGFloat(subviewCount)
         let totalSpacing = CGFloat(subviewCount - 1) * symbolSpacing.size
         let combinedWidth = (totalDots * symbolSize.pointSize) + totalSpacing
         let scale = indicatorSize.width / combinedWidth
-
+        
         let scaledUnitWidth = (symbolSize.pointSize + symbolSpacing.size) * scale
         let adjustedX = max(0, min(dragLocation.x, indicatorSize.width))
-
+        
         let floatIndex = adjustedX / scaledUnitWidth
         let index = Int(floatIndex.rounded())
-
+        
         externalIndex = min(max(index, 0), subviewCount - 1)
     }
 }

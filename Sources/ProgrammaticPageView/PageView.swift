@@ -50,9 +50,10 @@ public struct PageView<Content: View, Indicator: View>: View {
     public var indicatorProxy: ((PageViewIndicator) -> Indicator)?
     
     @State private var internalIndex: Int = 0
+    @State private var numberOfSubviews: Int = 0
     @State private var isMovingForward: Bool = true
     @State private var isIgnoringChange: Bool = false
-    @State private var numberOfSubviews = 0
+    @State private var isInitialPageSet: Bool = false
     
     private var defaultPage: Page?
     private var forwardTransition: AnyTransition = .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
@@ -111,7 +112,7 @@ public struct PageView<Content: View, Indicator: View>: View {
             .padding(.bottom, indicatorOffset)
         }
         .sensoryFeedback(trigger: internalIndex) { _, _ in
-            return feedback
+            return isInitialPageSet ? feedback : nil
         }
         .task { @MainActor in
             isIgnoringChange = true
@@ -125,6 +126,8 @@ public struct PageView<Content: View, Indicator: View>: View {
                 updateIndex(to: numberOfSubviews - 1)
             }
             isIgnoringChange = false
+            try? await Task.sleep(for: .seconds(0.25))
+            isInitialPageSet = true
         }
         .onChange(of: externalIndex) { oldIndex, newIndex in
             guard !isIgnoringChange else {

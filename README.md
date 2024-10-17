@@ -1,4 +1,4 @@
-# ProgrammaticPageView
+# ProgrammaticPageView 📱✨
 
 A SwiftUI pager view for programmatic navigation with customizable transitions. Ideal for onboarding screens and multi-step forms requiring fine-grained control.
 
@@ -9,7 +9,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS-lightgrey.svg)](https://developer.apple.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## Features
+## Features 🌟
 
 - 🎛️ Programmatic navigation via index binding
 - 🔄 Customizable forward/backward transitions
@@ -18,7 +18,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 - 🔒 Fine-grained navigation control
 - 🎨 Customizable indicator styling and gestures
 
-## Why ProgrammaticPageView?
+## Why ProgrammaticPageView? 🤔
 
 ### Limitations of Alternatives
 
@@ -38,7 +38,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 - ✨ Custom SwiftUI transitions and animations
 - 📱 Ideal for guided user flows
 
-## Installation
+## Installation 📦
 
 #### Swift Package Manager
 
@@ -50,7 +50,7 @@ dependencies: [
 
 Or add it via Xcode by going to File > Add Packages… and entering the repository URL.
 
-## Example
+## Example 💡
 
 ### Onboarding Flow with Conditional Navigation and Custom Indicator
 
@@ -92,7 +92,7 @@ struct OnboardingView: View {
 }
 ```
 
-## API Reference
+## API Reference 📚
 
 ### Initializers
 
@@ -204,14 +204,14 @@ pageViewIndicatorOffset(_ offset: CGFloat) -> Self
 Sets the vertical offset of the page view indicator from the bottom of the view.
 - `offset`: The distance in points to offset the indicator from the bottom.
 
-## License
+## License 📄
 
 This project is licensed under the MIT License.
 
-## Contributing
+## Contributing 🤝
 
 Contributions are welcome! Please open an issue or submit a pull request.
 
-## Contact
+## Contact 📧
 
 For questions or suggestions, please open an issue on GitHub.

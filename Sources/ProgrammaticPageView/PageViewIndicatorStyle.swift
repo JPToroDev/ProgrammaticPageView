@@ -1,8 +1,9 @@
 //
-//  PageViewIndicatorStyle.swift
-//  ProgrammaticPageView
-//
-//  Created by JP Toro on 10/10/24.
+// PageViewIndicatorStyle.swift
+// ProgrammaticPageView
+// https://github.com/JPToroDev/ProgrammaticPageView
+// See LICENSE for license information.
+// © 2024 J.P. Toro
 //
 
 import Foundation
@@ -11,13 +12,13 @@ import Foundation
 public enum PageViewIndicatorStyle {
     /// Displays the page indicator as a series of dots.
     case dotIndicator
-    
+
     /// Displays the page indicator as a progress bar.
     /// - Parameter width: The width of the progress bar.
     case progressBar(width: CGFloat)
-    
+
     /// Creates a progress bar style with the default width of 100 points.
     public static var progressBar: PageViewIndicatorStyle {
-        return .progressBar(width: 100)
+        .progressBar(width: 100)
     }
 }

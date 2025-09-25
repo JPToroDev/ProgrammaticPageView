@@ -1,20 +1,20 @@
 //
-//  PageViewIndicatorSymbolSpacing.swift
-//  ProgrammaticPageView
-//
-//  Created by JP Toro on 10/8/24.
+// PageViewProgressBar.swift
+// ProgrammaticPageView
+// https://github.com/JPToroDev/ProgrammaticPageView
+// See LICENSE for license information.
+// © 2024 J.P. Toro
 //
 
 import SwiftUI
 
 /// A SwiftUI view that displays a progress bar for page views, including smooth transitions between pages.
 struct PageViewProgressBar: View {
-    
     /// The index of the currently displayed page.
     var currentIndex: Int
     /// The total number of pages in the view.
     var pageCount: Int
-    
+
     private enum AnimationPhase {
         case updateProgress
         case clearProgressFromTrailing
@@ -23,7 +23,7 @@ struct PageViewProgressBar: View {
         case clearProgressFromLeading
         case switchAlignmentToTrailing
         case setProgressFromTrailing
-        
+
         var alignment: Alignment {
             switch self {
             case .updateProgress, .switchAlignmentToLeading, .setProgressFromLeading, .clearProgressFromLeading:
@@ -33,15 +33,15 @@ struct PageViewProgressBar: View {
             }
         }
     }
-    
+
     @State private var progressBarWidth: CGFloat = 0.0
     @State private var isTransitioning: Bool = false
     @State private var animationPhases: [AnimationPhase] = [.updateProgress]
-    
+
     private var lastPageIndex: Int {
         max(pageCount - 1, 0)
     }
-    
+
     var body: some View {
         Capsule()
             .fill(.white)
@@ -69,36 +69,43 @@ struct PageViewProgressBar: View {
                 handlePageChange(from: oldIndex, to: newIndex)
             }
     }
-    
+
     private func progress(for phase: AnimationPhase) -> CGFloat {
         guard pageCount > 0 else { return 0 }
         switch phase {
         case .updateProgress, .setProgressFromLeading:
             return CGFloat(currentIndex + 1) / CGFloat(pageCount)
-        case .clearProgressFromTrailing, .clearProgressFromLeading, .switchAlignmentToLeading, .switchAlignmentToTrailing:
+        case .clearProgressFromTrailing, .clearProgressFromLeading,
+             .switchAlignmentToLeading, .switchAlignmentToTrailing:
             return 0
         case .setProgressFromTrailing:
             return 1
         }
     }
-    
+
     private func handlePageChange(from oldIndex: Int, to newIndex: Int) {
         guard pageCount > 0 else { return }
         let adjustedOldIndex = oldIndex.clamped(to: 0...lastPageIndex)
         let adjustedNewIndex = newIndex.clamped(to: 0...lastPageIndex)
-        
-        if adjustedNewIndex == 0 && adjustedOldIndex == lastPageIndex {
+
+        if adjustedNewIndex == 0, adjustedOldIndex == lastPageIndex {
             animateProgressTransition(toStart: true)
-        } else if adjustedNewIndex == lastPageIndex && adjustedOldIndex == 0 {
+        } else if adjustedNewIndex == lastPageIndex, adjustedOldIndex == 0 {
             animateProgressTransition(toStart: false)
         }
     }
-    
+
     private func animateProgressTransition(toStart: Bool) {
-        if toStart {
-            animationPhases = [.updateProgress, .clearProgressFromTrailing, .switchAlignmentToLeading, .setProgressFromLeading]
+        animationPhases = if toStart {
+            [.updateProgress,
+             .clearProgressFromTrailing,
+             .switchAlignmentToLeading,
+             .setProgressFromLeading]
         } else {
-            animationPhases = [.updateProgress, .clearProgressFromLeading, .switchAlignmentToTrailing, .setProgressFromTrailing]
+            [.updateProgress,
+             .clearProgressFromLeading,
+             .switchAlignmentToTrailing,
+             .setProgressFromTrailing]
         }
         isTransitioning.toggle()
     }

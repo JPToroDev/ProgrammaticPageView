@@ -1,8 +1,9 @@
 //
-//  Page.swift
-//  ProgrammaticPageView
-//
-//  Created by JP Toro on 10/7/24.
+// Page.swift
+// ProgrammaticPageView
+// https://github.com/JPToroDev/ProgrammaticPageView
+// See LICENSE for license information.
+// © 2024 J.P. Toro
 //
 
 import Foundation
@@ -11,6 +12,7 @@ import Foundation
 public enum Page {
     /// The first page.
     case first
+
     /// The last page.
     case last
 }

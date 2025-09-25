@@ -1,4 +1,4 @@
-# ProgrammaticPageView
+# ProgrammaticPageView 📱✨
 
 A SwiftUI pager view for programmatic navigation with customizable transitions. Ideal for onboarding screens and multi-step forms requiring fine-grained control.
 
@@ -9,7 +9,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS-lightgrey.svg)](https://developer.apple.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## Features
+## Features 🌟
 
 - 🎛️ Programmatic navigation via index binding
 - 🔄 Customizable forward/backward transitions
@@ -18,7 +18,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 - 🔒 Fine-grained navigation control
 - 🎨 Customizable indicator styling and gestures
 
-## Why ProgrammaticPageView?
+## Why ProgrammaticPageView? 🤔
 
 ### Limitations of Alternatives
 
@@ -38,7 +38,7 @@ A SwiftUI pager view for programmatic navigation with customizable transitions. 
 - ✨ Custom SwiftUI transitions and animations
 - 📱 Ideal for guided user flows
 
-## Installation
+## Installation 📦
 
 #### Swift Package Manager
 
@@ -50,7 +50,7 @@ dependencies: [
 
 Or add it via Xcode by going to File > Add Packages… and entering the repository URL.
 
-## Example
+## Example 💡
 
 ### Onboarding Flow with Conditional Navigation and Custom Indicator
 
@@ -61,21 +61,25 @@ import ProgrammaticPageView
 struct OnboardingView: View {
     @State private var pageIndex = 0
     @State private var hasAcceptedTerms = false
-    
+
     var body: some View {
         PageView(index: $pageIndex) {
             VStack {
                 Text("Welcome!")
                 Button("Next") { pageIndex += 1 }
+                    .buttonStyle(.borderedProminent)
             }
-            if !hasAcceptedTerms {
-                List {
-                    Text("Please accept terms and conditions.")
-                    Toggle("Accept Terms", isOn: $hasAcceptedTerms)
+
+            List {
+                Text("Please accept terms and conditions.")
+                Toggle("Accept Terms", isOn: $hasAcceptedTerms)
+
+                Section {
                     Button("Next") { pageIndex += 1 }
                         .disabled(!hasAcceptedTerms)
                 }
             }
+
             VStack {
                 Text("All Set!")
                 Button("Get Started") {
@@ -86,13 +90,13 @@ struct OnboardingView: View {
         .pageViewIndicatorVisibility(.visible)
         .pageViewIndicatorIndexSymbol("square.fill", size: .large)
         .pageViewIndicatorStyle(.progressBar)
-        .pageViewIndicatorBackground(Color.blue)
+        .pageViewIndicatorBackgroundStyle(.blue)
         .pageViewIndicatorOffset(20)
     }
 }
 ```
 
-## API Reference
+## API Reference 📚
 
 ### Initializers
 
@@ -121,6 +125,8 @@ The second initializer allows for a custom indicator view to be provided.
 
 ### Methods
 
+#### Page Transitions
+
 ```swift
 pageTransition(forward: AnyTransition, backward: AnyTransition, animation: Animation? = .default) -> Self
 ```
@@ -128,7 +134,7 @@ pageTransition(forward: AnyTransition, backward: AnyTransition, animation: Anima
 Sets custom transitions for page changes and an optional animation.
 - `forward`: The transition to use when moving to the next page.
 - `backward`: The transition to use when moving to the previous page.
-- `animation`: An optional animation to apply during page transitions.
+- `animation`: An optional animation to apply to the page transitions.
 
 ```swift
 pageTransition(_ transition: AnyTransition? = nil, animation: Animation? = .default) -> Self
@@ -136,7 +142,9 @@ pageTransition(_ transition: AnyTransition? = nil, animation: Animation? = .defa
 
 Sets a single transition for both forward and backward page changes and an optional animation.
 - `transition`: The transition to use for both forward and backward page changes. If `nil`, the default transition is used.
-- `animation`: An optional animation to apply during page transitions.
+- `animation`: An optional animation to apply to the page transition.
+
+#### Page Configuration
 
 ```swift
 defaultPage(_ page: Page) -> Self
@@ -146,56 +154,59 @@ Sets the default page without animation. This will be overridden if `index` is n
 - `page`: `.first` or `.last`.
 
 ```swift
-func pageViewIndicatorStyle(_ style: PageViewIndicatorStyle) -> Self
-```
-
-Sets the visual style of the page view indicator.
-  - `style`: The style to apply to the page view indicator.
-
-```swift
-pageViewIndicator(visibility: Visibility, dragToNavigate: Bool = false) -> Self
-```
-
-Configures the page view indicator's visibility and interaction.
-- `visibility`: Determines whether the indicator is visible.
-- `dragToNavigate`: A Boolean value that determines whether dragging on the indicator changes the current page. Default is `false`.
-
-```swift
-func pageViewFeedback(_ feedback: SensoryFeedback?) -> Self
+pageViewFeedback(_ feedback: SensoryFeedback?) -> Self
 ```
 
 Sets the haptic feedback for page transitions in the page view.
 - `feedback`: The haptic feedback to play when the current page changes. Set to `nil` to disable feedback.
 
+#### Indicator Configuration
+
 ```swift
-func pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self
+pageViewIndicatorVisibility(_ visibility: Visibility) -> Self
 ```
 
-Configures a long press action for the page view indicator.
-- `action`: A closure to be executed when the page view indicator is long-pressed.
+Configures the page view indicator's visibility.
+- `visibility`: Determines whether the indicator is visible.
 
 ```swift
-func pageViewIndicatorTapAction(_ action: @escaping () -> Void) -> Self
+pageViewIndicatorStyle(_ style: PageViewIndicatorStyle) -> Self
 ```
 
-Configures a long press action for the page view indicator.
-- `action`: A closure to be executed when the page view indicator is tapped.
+Sets the visual style of the page view indicator.
+- `style`: The style to apply to the page view indicator.
 
 ```swift
-func pageViewIndicatorIndexSymbol(_ symbol: String = "circle.fill", size: PageViewIndicatorSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .default) -> Self
+pageViewIndicatorDragNavigation(_ draggability: PageViewIndicatorDraggability) -> Self
+```
+
+Configures drag navigation for the page view indicator.
+- `draggability`: A value that determines whether drag navigation is enabled or disabled.
+
+#### Indicator Styling
+
+```swift
+pageViewIndicatorIndexSymbol(_ symbol: String = "circle.fill", size: PageViewIndexSize = .regular, spacing: PageViewIndicatorSymbolSpacing = .automatic) -> Self
 ```
 
 Configures the page view indicator's symbol, size, and spacing.
 - `symbol`: The SF Symbol name to use for page indicators. Default is "circle.fill".
 - `size`: The size of the page indicator symbols. Default is `.regular`.
-- `spacing`: The spacing between page indicator symbols. Default is `.default`.
+- `spacing`: The spacing between page indicator symbols. Default is `.automatic`.
 
 ```swift
-pageViewIndicatorBackground<S: ShapeStyle>(_ background: S?) -> Self
+pageViewIndicatorBackgroundStyle<S: ShapeStyle>(_ style: S) -> Self
 ```
 
 Sets a custom background style for the page view indicator.
-- `background`: A shape style to be used as the background for the indicator. If `nil`, the background will be removed.
+- `style`: A shape style to be used as the background for the indicator.
+
+```swift
+pageViewIndicatorBackgroundStyle(_ style: ExpressibleByNilLiteral?) -> Self
+```
+
+Removes the background style from the page view indicator.
+- `style`: Pass `nil` to remove the background.
 
 ```swift
 pageViewIndicatorOffset(_ offset: CGFloat) -> Self
@@ -204,14 +215,30 @@ pageViewIndicatorOffset(_ offset: CGFloat) -> Self
 Sets the vertical offset of the page view indicator from the bottom of the view.
 - `offset`: The distance in points to offset the indicator from the bottom.
 
+#### Indicator Actions
+
+```swift
+pageViewIndicatorTapAction(_ action: @escaping () -> Void) -> Self
+```
+
+Configures a tap action for the page view indicator.
+- `action`: A closure to be executed when the page view indicator is tapped.
+
+```swift
+pageViewIndicatorLongPressAction(_ action: @escaping () -> Void) -> Self
+```
+
+Configures a long press action for the page view indicator.
+- `action`: A closure to be executed when the page view indicator is long-pressed.
+
 ## License
 
 This project is licensed under the MIT License.
 
-## Contributing
+## Contributing 🤝
 
 Contributions are welcome! Please open an issue or submit a pull request.
 
-## Contact
+## Contact 📧
 
 For questions or suggestions, please open an issue on GitHub.

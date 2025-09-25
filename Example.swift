@@ -1,47 +1,65 @@
 //
-//  Example.swift
-//  SwiftCarousel
-//
-//  Created by JP Toro on 10/4/24.
+// Example.swift
+// ProgrammaticPageView
+// https://github.com/JPToroDev/ProgrammaticPageView
+// See LICENSE for license information.
+// © 2024 J.P. Toro
 //
 
 import SwiftUI
 
 struct ContentView: View {
-  @State private var index = 0
-  
-  var body: some View {
-    ZStack(alignment: .bottom) {
-      PageView(index: $index, loops: true) {
-        Color.red
-        Color.blue
-        Color.purple
-        Color.yellow
-        Color.green
-        Color.orange
-        Color.indigo
-      } //: Carousel
-      HStack {
-        Button("Back") {
-          index -= 1
+    @State private var pageIndex = 0
+    @State private var hasAcceptedTerms = false
+
+    var body: some View {
+        PageView(index: $pageIndex) {
+            page1
+            page2
+            page3
         }
-        Button("Forward") {
-          index += 1
+        .pageViewIndicatorVisibility(.visible)
+        .pageViewIndicatorIndexSymbol("square.fill", size: .large)
+        .pageViewIndicatorStyle(.dotIndicator)
+        .pageViewIndicatorBackgroundStyle(.blue)
+        .pageViewIndicatorLongPressAction {
+            print("Some action")
         }
-        Rectangle()
-          .frame(width: 1, height: 20)
-        Button("Yellow") {
-          index = 3
+    }
+
+    private var page1: some View {
+        VStack {
+            Text("Welcome!")
+            Button("Next") { pageIndex += 1 }
+                .buttonStyle(.borderedProminent)
         }
-      } //: HStack
-      .padding()
-      .background(.white, in: .rect(cornerRadius: 12, style: .continuous))
-      .padding(.bottom, 25)
-    } //: ZStack
-    .ignoresSafeArea(edges: [.vertical])
-  }
+    }
+
+    private var page2: some View {
+        List {
+            Text("Please accept terms and conditions.")
+            Toggle("Accept Terms", isOn: $hasAcceptedTerms)
+
+            Section {
+                Button("Next") { pageIndex += 1 }
+                    .disabled(!hasAcceptedTerms)
+            }
+        }
+    }
+
+    private var page3: some View {
+        VStack {
+            Text("All Set!")
+            Button("Get Started") {
+                // Proceed to main app
+            }
+            Button("Restart") {
+               pageIndex = 0
+            }
+        }
+    }
 }
 
 #Preview {
-  ContentView()
+    ContentView()
 }

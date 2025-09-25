@@ -135,7 +135,7 @@ public struct PageViewIndicator: View {
             ForEach(0 ..< subviewCount, id: \.self) { index in
                 Image(systemName: configuration.indexSymbol)
                     .font(.system(size: configuration.indexSize.pointSize))
-                    .foregroundStyle(externalIndex == index ? .white : Color(.tertiaryLabel))
+                    .foregroundStyle(externalIndex == index ? AnyShapeStyle(.white) : AnyShapeStyle(.tertiary))
                     .symbolEffect(.bounce.up, options: .nonRepeating, isActive: externalIndex == index)
                     .animation(nil, value: longPressPhase)
             }

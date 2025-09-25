@@ -1,13 +1,18 @@
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/79a0ad86-b5f4-46f4-88dd-c3fb1ee3a06a" height="500">
+</div>
+
+<div align="center">
+
 # ProgrammaticPageView 📱✨
 
 A SwiftUI pager view for programmatic navigation with customizable transitions. Ideal for onboarding screens and multi-step forms requiring fine-grained control.
 
-> **Note:** Requires iOS 18 and aligned releases
-
 [![Swift Version](https://img.shields.io/badge/Swift-6.0-orange)](https://swift.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS-lightgrey.svg)](https://developer.apple.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Platform](https://img.shields.io/badge/platform-iOS%2018%2B%20%7C%20macOS%2015%2B-lightgrey.svg)](https://developer.apple.com/)
+
+</div>
 
 ## Features 🌟
 
